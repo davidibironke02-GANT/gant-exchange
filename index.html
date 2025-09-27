@@ -3,32 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GANT Platform Test</title>
+  <title>GANT Prototype</title>
 </head>
 <body>
   <h1>Farmers List</h1>
-
-  <!-- Form to add new farmers -->
-  <form id="farmer-form">
-    <input type="text" id="farmer-name" placeholder="Enter farmer name" required>
-    <button type="submit">Add Farmer</button>
-  </form>
-
-  <!-- Display list of farmers -->
   <ul id="farmers"></ul>
+
+  <h2>Add a Farmer</h2>
+  <input type="text" id="farmerName" placeholder="Enter farmer name">
+  <button id="addFarmerBtn">Add Farmer</button>
 
   <script type="module">
     import { supabase } from './supabaseClient.js';
 
+    // Load all farmers from the table
     async function loadFarmers() {
-      const { data, error } = await supabase.from('farmers').select('*');
+      const { data, error } = await supabase.from('test_table').select('*');
       if (error) {
-        console.error(error);
+        console.error("Error fetching farmers:", error.message);
+        alert("Error: " + error.message);
         return;
       }
 
       const list = document.getElementById('farmers');
-      list.innerHTML = ""; // clear old list
+      list.innerHTML = ""; // clear old items
+
       data.forEach(farmer => {
         const li = document.createElement('li');
         li.textContent = farmer.name;
@@ -36,23 +35,33 @@
       });
     }
 
-    // handle form submit
-    document.getElementById('farmer-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const nameInput = document.getElementById('farmer-name');
-      const name = nameInput.value.trim();
+    // Add a new farmer
+    async function addFarmer() {
+      const nameInput = document.getElementById('farmerName');
+      const farmerName = nameInput.value.trim();
 
-      if (!name) return;
-
-      const { error } = await supabase.from('farmers').insert([{ name }]);
-      if (error) {
-        console.error(error);
-      } else {
-        nameInput.value = ""; // clear input
-        loadFarmers(); // refresh list
+      if (!farmerName) {
+        alert("Please enter a name");
+        return;
       }
-    });
 
+      const { error } = await supabase
+        .from('test_table')
+        .insert([{ name: farmerName }]);
+
+      if (error) {
+        console.error("Error inserting farmer:", error.message);
+        alert("Insert failed: " + error.message);
+        return;
+      }
+
+      nameInput.value = "";
+      loadFarmers(); // refresh list
+    }
+
+    document.getElementById('addFarmerBtn').addEventListener('click', addFarmer);
+
+    // Initial load
     loadFarmers();
   </script>
 </body>
