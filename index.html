@@ -7,32 +7,51 @@
 </head>
 <body>
   <h1>Farmers List</h1>
+
+  <!-- Form to add new farmers -->
+  <form id="farmer-form">
+    <input type="text" id="farmer-name" placeholder="Enter farmer name" required>
+    <button type="submit">Add Farmer</button>
+  </form>
+
+  <!-- Display list of farmers -->
   <ul id="farmers"></ul>
 
   <script type="module">
-    // Initialize Supabase directly here (no need for supabaseClient.js if you want it simple)
-    import { createClient } from "https://esm.sh/@supabase/supabase-js";
-
-    const SUPABASE_URL = "https://djtdmqqsereqkppckjyx.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqdGRtcXFzZXJlcWtwcGNranl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MDM1NjUsImV4cCI6MjA3NDQ3OTU2NX0.f6Qo_xFEHep6A7ulaM9RlP_ILQXCLqdBKPuwPNfATGQ";
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    import { supabase } from './supabaseClient.js';
 
     async function loadFarmers() {
-      const { data, error } = await supabase.from("farmers").select("*");
+      const { data, error } = await supabase.from('farmers').select('*');
       if (error) {
-        console.error("Error fetching farmers:", error);
+        console.error(error);
         return;
       }
 
-      const list = document.getElementById("farmers");
-      list.innerHTML = ""; // clear first
+      const list = document.getElementById('farmers');
+      list.innerHTML = ""; // clear old list
       data.forEach(farmer => {
-        const li = document.createElement("li");
+        const li = document.createElement('li');
         li.textContent = farmer.name;
         list.appendChild(li);
       });
     }
+
+    // handle form submit
+    document.getElementById('farmer-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nameInput = document.getElementById('farmer-name');
+      const name = nameInput.value.trim();
+
+      if (!name) return;
+
+      const { error } = await supabase.from('farmers').insert([{ name }]);
+      if (error) {
+        console.error(error);
+      } else {
+        nameInput.value = ""; // clear input
+        loadFarmers(); // refresh list
+      }
+    });
 
     loadFarmers();
   </script>
