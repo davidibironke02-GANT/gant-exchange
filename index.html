@@ -30,7 +30,15 @@
 
       data.forEach(farmer => {
         const li = document.createElement('li');
-        li.textContent = farmer.name;
+        li.textContent = farmer.name + " ";
+
+        // Create delete button
+        const delBtn = document.createElement('button');
+        delBtn.textContent = "Delete";
+        delBtn.style.marginLeft = "10px";
+        delBtn.addEventListener('click', () => deleteFarmer(farmer.id));
+
+        li.appendChild(delBtn);
         list.appendChild(li);
       });
     }
@@ -56,6 +64,22 @@
       }
 
       nameInput.value = "";
+      loadFarmers(); // refresh list
+    }
+
+    // Delete a farmer by ID
+    async function deleteFarmer(id) {
+      const { error } = await supabase
+        .from('test_table')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error("Error deleting farmer:", error.message);
+        alert("Delete failed: " + error.message);
+        return;
+      }
+
       loadFarmers(); // refresh list
     }
 
