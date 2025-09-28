@@ -3,125 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GANT Prototype with Auth</title>
+  <title>GANT Prototype</title>
 </head>
 <body>
-  <h1>GANT Prototype</h1>
+  <h1>GANT Exchange Prototype</h1>
 
   <!-- Auth Section -->
-  <div id="auth">
-    <h2>Login / Sign Up</h2>
-    <input type="email" id="email" placeholder="Email"><br>
-    <input type="password" id="password" placeholder="Password"><br>
-    <button id="signupBtn">Sign Up</button>
+  <div id="auth-section">
     <button id="loginBtn">Login</button>
-    <button id="logoutBtn" style="display:none;">Logout</button>
+    <button id="signupBtn">Sign Up</button>
   </div>
 
-  <!-- Trades Section (hidden until login) -->
-  <div id="tradesSection" style="display:none;">
-    <h2>Trades List</h2>
-    <ul id="trades"></ul>
-
-    <h3>Add a Trade</h3>
-    <input type="text" id="seller" placeholder="Seller"><br>
-    <input type="text" id="buyer" placeholder="Buyer"><br>
-    <input type="text" id="commodity" placeholder="Commodity"><br>
-    <input type="number" id="quantity" placeholder="Quantity (tons)"><br>
-    <input type="number" id="price" placeholder="Price per ton"><br>
-    <button id="addTradeBtn">Add Trade</button>
+  <!-- User Section -->
+  <div id="user-section" style="display:none;">
+    <p id="welcomeMsg"></p>
+    <button id="logoutBtn">Logout</button>
   </div>
+
+  <h2>Trades List</h2>
+  <ul id="trades"></ul>
+
+  <h2>Add a Trade</h2>
+  <input type="text" id="seller" placeholder="Seller">
+  <input type="text" id="buyer" placeholder="Buyer">
+  <input type="text" id="commodity" placeholder="Commodity">
+  <input type="number" id="quantity" placeholder="Quantity (tons)">
+  <input type="number" id="price" placeholder="Price ($/ton)">
+  <button id="addTradeBtn">Add Trade</button>
 
   <script type="module">
     import { supabase } from './supabaseClient.js';
 
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const signupBtn = document.getElementById('signupBtn');
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const tradesSection = document.getElementById('tradesSection');
-    const authSection = document.getElementById('auth');
+    // ====== AUTH HANDLING ======
+    const authSection = document.getElementById("auth-section");
+    const userSection = document.getElementById("user-section");
+    const welcomeMsg = document.getElementById("welcomeMsg");
 
-    // Load trades
+    async function checkUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        authSection.style.display = "none";
+        userSection.style.display = "block";
+        welcomeMsg.textContent = `Welcome, ${user.email}`;
+      } else {
+        authSection.style.display = "block";
+        userSection.style.display = "none";
+      }
+    }
+
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      await supabase.auth.signInWithOtp({ email: prompt("Enter your email:") });
+      alert("Check your email for the login link!");
+    });
+
+    document.getElementById("signupBtn").addEventListener("click", async () => {
+      await supabase.auth.signUp({ email: prompt("Enter your email:"), password: prompt("Enter a password:") });
+      alert("Check your email to confirm signup!");
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      checkUser();
+    });
+
+    // Run on page load
+    checkUser();
+
+    // ====== TRADES HANDLING ======
     async function loadTrades() {
-      const { data, error } = await supabase.from('trades').select('*');
+      const { data, error } = await supabase.from("trades").select("*");
       if (error) {
-        console.error(error);
+        console.error("Error fetching trades:", error.message);
         return;
       }
-      const list = document.getElementById('trades');
+
+      const list = document.getElementById("trades");
       list.innerHTML = "";
+
       data.forEach(trade => {
-        const li = document.createElement('li');
+        const li = document.createElement("li");
         li.textContent = `${trade.seller} sold ${trade.quantity} tons of ${trade.commodity} to ${trade.buyer} @ $${trade.price}/ton`;
         list.appendChild(li);
       });
     }
 
-    // Add trade
     async function addTrade() {
-      const seller = document.getElementById('seller').value.trim();
-      const buyer = document.getElementById('buyer').value.trim();
-      const commodity = document.getElementById('commodity').value.trim();
-      const quantity = parseInt(document.getElementById('quantity').value);
-      const price = parseFloat(document.getElementById('price').value);
+      const seller = document.getElementById("seller").value.trim();
+      const buyer = document.getElementById("buyer").value.trim();
+      const commodity = document.getElementById("commodity").value.trim();
+      const quantity = parseInt(document.getElementById("quantity").value);
+      const price = parseFloat(document.getElementById("price").value);
 
       if (!seller || !buyer || !commodity || !quantity || !price) {
-        alert("Fill in all fields");
+        alert("Please fill in all fields");
         return;
       }
 
-      const { error } = await supabase.from('trades').insert([{ seller, buyer, commodity, quantity, price }]);
+      const { error } = await supabase.from("trades").insert([{ seller, buyer, commodity, quantity, price }]);
       if (error) {
+        console.error("Insert failed:", error.message);
         alert("Insert failed: " + error.message);
         return;
       }
 
+      document.getElementById("seller").value = "";
+      document.getElementById("buyer").value = "";
+      document.getElementById("commodity").value = "";
+      document.getElementById("quantity").value = "";
+      document.getElementById("price").value = "";
+
       loadTrades();
     }
 
-    // Auth: Sign up
-    signupBtn.addEventListener('click', async () => {
-      const { error } = await supabase.auth.signUp({
-        email: emailInput.value,
-        password: passwordInput.value
-      });
-      if (error) alert(error.message);
-      else alert("Check your email for confirmation!");
-    });
+    document.getElementById("addTradeBtn").addEventListener("click", addTrade);
 
-    // Auth: Login
-    loginBtn.addEventListener('click', async () => {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: emailInput.value,
-        password: passwordInput.value
-      });
-      if (error) alert(error.message);
-      else {
-        authSection.style.display = "none";
-        tradesSection.style.display = "block";
-        logoutBtn.style.display = "inline-block";
-        loadTrades();
-      }
-    });
-
-    // Auth: Logout
-    logoutBtn.addEventListener('click', async () => {
-      await supabase.auth.signOut();
-      authSection.style.display = "block";
-      tradesSection.style.display = "none";
-      logoutBtn.style.display = "none";
-    });
-
-    // Auto-check session
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      authSection.style.display = "none";
-      tradesSection.style.display = "block";
-      logoutBtn.style.display = "inline-block";
-      loadTrades();
-    }
+    loadTrades();
   </script>
 </body>
 </html>
