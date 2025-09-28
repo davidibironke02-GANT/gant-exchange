@@ -3,90 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GANT Prototype</title>
+  <title>GANT Exchange Prototype</title>
 </head>
 <body>
-  <h1>Farmers List</h1>
-  <ul id="farmers"></ul>
+  <h1>Trades List</h1>
+  <ul id="trades"></ul>
 
-  <h2>Add a Farmer</h2>
-  <input type="text" id="farmerName" placeholder="Enter farmer name">
-  <button id="addFarmerBtn">Add Farmer</button>
+  <h2>Add a Trade</h2>
+  <input type="text" id="farmer" placeholder="Farmer name">
+  <input type="text" id="buyer" placeholder="Buyer name">
+  <input type="text" id="commodity" placeholder="Commodity (e.g. Wheat)">
+  <input type="number" id="quantity" placeholder="Quantity (tons)">
+  <input type="number" id="price" placeholder="Price per ton">
+  <button id="addTradeBtn">Add Trade</button>
 
   <script type="module">
     import { supabase } from './supabaseClient.js';
 
-    // Load all farmers from the table
-    async function loadFarmers() {
-      const { data, error } = await supabase.from('test_table').select('*');
+    // Load all trades
+    async function loadTrades() {
+      const { data, error } = await supabase.from('trades').select('*');
       if (error) {
-        console.error("Error fetching farmers:", error.message);
+        console.error("Error fetching trades:", error.message);
         alert("Error: " + error.message);
         return;
       }
 
-      const list = document.getElementById('farmers');
-      list.innerHTML = ""; // clear old items
+      const list = document.getElementById('trades');
+      list.innerHTML = ""; // clear old list
 
-      data.forEach(farmer => {
+      data.forEach(trade => {
         const li = document.createElement('li');
-        li.textContent = farmer.name + " ";
-
-        // Create delete button
-        const delBtn = document.createElement('button');
-        delBtn.textContent = "Delete";
-        delBtn.style.marginLeft = "10px";
-        delBtn.addEventListener('click', () => deleteFarmer(farmer.id));
-
-        li.appendChild(delBtn);
+        li.textContent = `${trade.farmer_name} sold ${trade.quantity} tons of ${trade.commodity} to ${trade.buyer_name} @ $${trade.price}/ton`;
         list.appendChild(li);
       });
     }
 
-    // Add a new farmer
-    async function addFarmer() {
-      const nameInput = document.getElementById('farmerName');
-      const farmerName = nameInput.value.trim();
+    // Add a new trade
+    async function addTrade() {
+      const farmer = document.getElementById('farmer').value.trim();
+      const buyer = document.getElementById('buyer').value.trim();
+      const commodity = document.getElementById('commodity').value.trim();
+      const quantity = parseFloat(document.getElementById('quantity').value);
+      const price = parseFloat(document.getElementById('price').value);
 
-      if (!farmerName) {
-        alert("Please enter a name");
+      if (!farmer || !buyer || !commodity || !quantity || !price) {
+        alert("Please fill in all fields.");
         return;
       }
 
-      const { error } = await supabase
-        .from('test_table')
-        .insert([{ name: farmerName }]);
+      const { error } = await supabase.from('trades').insert([
+        {
+          farmer_name: farmer,
+          buyer_name: buyer,
+          commodity: commodity,
+          quantity: quantity,
+          price: price
+        }
+      ]);
 
       if (error) {
-        console.error("Error inserting farmer:", error.message);
+        console.error("Error inserting trade:", error.message);
         alert("Insert failed: " + error.message);
         return;
       }
 
-      nameInput.value = "";
-      loadFarmers(); // refresh list
+      // Clear form
+      document.getElementById('farmer').value = "";
+      document.getElementById('buyer').value = "";
+      document.getElementById('commodity').value = "";
+      document.getElementById('quantity').value = "";
+      document.getElementById('price').value = "";
+
+      loadTrades(); // refresh list
     }
 
-    // Delete a farmer by ID
-    async function deleteFarmer(id) {
-      const { error } = await supabase
-        .from('test_table')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error("Error deleting farmer:", error.message);
-        alert("Delete failed: " + error.message);
-        return;
-      }
-
-      loadFarmers(); // refresh list
-    }
-
-    document.getElementById('addFarmerBtn').addEventListener('click', addFarmer);
+    document.getElementById('addTradeBtn').addEventListener('click', addTrade);
 
     // Initial load
-    loadFarmers();
+    loadTrades();
   </script>
 </body>
 </html>
