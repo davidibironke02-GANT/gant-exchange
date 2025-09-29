@@ -8,76 +8,108 @@
 <body>
   <h1>GANT Exchange Prototype</h1>
 
-  <!-- Auth Buttons -->
-  <button id="loginBtn">Login</button>
-  <button id="signupBtn">Signup</button>
-  <button id="logoutBtn" style="display:none;">Logout</button>
+  <!-- Auth Section -->
+  <div id="auth">
+    <button id="loginBtn">Login</button>
+    <button id="signupBtn">Sign Up</button>
+    <button id="logoutBtn" style="display:none;">Logout</button>
+    <p id="userInfo"></p>
+  </div>
 
-  <!-- Trades List -->
+  <!-- Trades -->
   <h2>Trades List</h2>
   <ul id="trades"></ul>
 
-  <!-- Add a Trade -->
-  <h2>Add a Trade</h2>
-  <input type="text" id="farmerName" placeholder="Farmer Name">
-  <input type="text" id="buyerName" placeholder="Buyer Name">
-  <input type="text" id="commodity" placeholder="Commodity (e.g., Wheat)">
-  <input type="number" id="quantity" placeholder="Quantity (tons)">
-  <input type="number" id="price" placeholder="Price ($/ton)">
-  <button id="addTradeBtn">Add Trade</button>
+  <!-- Add Trade -->
+  <div id="tradeForm" style="display:none;">
+    <h2>Add a Trade</h2>
+    <input type="text" id="farmerName" placeholder="Farmer name">
+    <input type="text" id="buyerName" placeholder="Buyer name">
+    <input type="text" id="commodity" placeholder="Commodity">
+    <input type="number" id="quantity" placeholder="Quantity (tons)">
+    <input type="number" id="price" placeholder="Price per ton">
+    <button id="addTradeBtn">Add Trade</button>
+  </div>
 
   <script type="module">
     import { supabase } from './supabaseClient.js';
 
-    // Load trades
+    const loginBtn = document.getElementById("loginBtn");
+    const signupBtn = document.getElementById("signupBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const userInfo = document.getElementById("userInfo");
+    const tradeForm = document.getElementById("tradeForm");
+    const tradesList = document.getElementById("trades");
+
+    // --- Auth functions ---
+    loginBtn.addEventListener("click", async () => {
+      const email = prompt("Enter email:");
+      const password = prompt("Enter password:");
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) alert("Login failed: " + error.message);
+      else await checkUser();
+    });
+
+    signupBtn.addEventListener("click", async () => {
+      const email = prompt("Enter email:");
+      const password = prompt("Enter password:");
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) alert("Signup failed: " + error.message);
+      else alert("Check your email to confirm signup");
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      await checkUser();
+    });
+
+    async function checkUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        userInfo.textContent = "Logged in as: " + user.email;
+        loginBtn.style.display = "none";
+        signupBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
+        tradeForm.style.display = "block";
+      } else {
+        userInfo.textContent = "";
+        loginBtn.style.display = "inline-block";
+        signupBtn.style.display = "inline-block";
+        logoutBtn.style.display = "none";
+        tradeForm.style.display = "none";
+      }
+      loadTrades();
+    }
+
+    // --- Trades ---
     async function loadTrades() {
-      const { data, error } = await supabase.from('trades').select('*');
+      const { data, error } = await supabase.from("trades").select("*");
       if (error) {
-        console.error("Error fetching trades:", error.message);
-        alert("Error loading trades: " + error.message);
+        console.error(error);
         return;
       }
 
-      const list = document.getElementById('trades');
-      list.innerHTML = "";
-
+      tradesList.innerHTML = "";
       data.forEach(trade => {
-        const li = document.createElement('li');
+        const li = document.createElement("li");
         li.textContent = `${trade.farmer_name} sold ${trade.quantity} tons of ${trade.commodity} to ${trade.buyer_name} @ $${trade.price}/ton`;
-
-        // Delete button
-        const delBtn = document.createElement('button');
-        delBtn.textContent = "Delete Trade";
-        delBtn.style.marginLeft = "10px";
-        delBtn.onclick = async () => {
-          const { error } = await supabase.from('trades').delete().eq('id', trade.id);
-          if (error) {
-            console.error("Error deleting trade:", error.message);
-            alert("Delete failed: " + error.message);
-          } else {
-            loadTrades(); // refresh after delete
-          }
-        };
-
-        li.appendChild(delBtn);
-        list.appendChild(li);
+        tradesList.appendChild(li);
       });
     }
 
-    // Add trade
     async function addTrade() {
-      const farmer = document.getElementById('farmerName').value.trim();
-      const buyer = document.getElementById('buyerName').value.trim();
-      const commodity = document.getElementById('commodity').value.trim();
-      const quantity = parseInt(document.getElementById('quantity').value);
-      const price = parseFloat(document.getElementById('price').value);
+      const farmer = document.getElementById("farmerName").value.trim();
+      const buyer = document.getElementById("buyerName").value.trim();
+      const commodity = document.getElementById("commodity").value.trim();
+      const quantity = document.getElementById("quantity").value;
+      const price = document.getElementById("price").value;
 
       if (!farmer || !buyer || !commodity || !quantity || !price) {
-        alert("Please fill all fields");
+        alert("Fill all fields");
         return;
       }
 
-      const { error } = await supabase.from('trades').insert([{
+      const { error } = await supabase.from("trades").insert([{
         farmer_name: farmer,
         buyer_name: buyer,
         commodity,
@@ -86,25 +118,21 @@
       }]);
 
       if (error) {
-        console.error("Error inserting trade:", error.message);
         alert("Insert failed: " + error.message);
-        return;
+      } else {
+        document.getElementById("farmerName").value = "";
+        document.getElementById("buyerName").value = "";
+        document.getElementById("commodity").value = "";
+        document.getElementById("quantity").value = "";
+        document.getElementById("price").value = "";
+        loadTrades();
       }
-
-      // Clear inputs
-      document.getElementById('farmerName').value = "";
-      document.getElementById('buyerName').value = "";
-      document.getElementById('commodity').value = "";
-      document.getElementById('quantity').value = "";
-      document.getElementById('price').value = "";
-
-      loadTrades();
     }
 
-    document.getElementById('addTradeBtn').addEventListener('click', addTrade);
+    document.getElementById("addTradeBtn").addEventListener("click", addTrade);
 
-    // Initial load
-    loadTrades();
+    // On load
+    checkUser();
   </script>
 </body>
 </html>
