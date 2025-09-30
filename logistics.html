@@ -3,31 +3,149 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Logistics Dashboard - GANT Exchange</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Logistics Dashboard</title>
+  <style>
+    body {
+      font-family: "IBM Plex Sans", sans-serif;
+      background-color: #0b1f16; /* deep green */
+      color: #f5f5dc; /* beige */
+      margin: 0;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .logout-btn {
+      background: #a83232;
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .logout-btn:hover {
+      background: #cc3b3b;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #11291b;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background: #1f7a4d;
+      color: #f5f5dc;
+    }
+    tr:nth-child(even) {
+      background: #163d2a;
+    }
+
+    /* Verify Button */
+    .verify-btn {
+      background: #1f7a4d;
+      color: #f5f5dc;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    .verify-btn:hover {
+      background: #29a366;
+    }
+  </style>
 </head>
 <body>
-  <div class="navbar">
-    <div class="brand">GANT Exchange</div>
-    <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="farmer.html">Farmer</a>
-      <a href="buyer.html">Buyer</a>
-      <a href="logistics.html">Logistics</a>
-      <a href="family.html">Family</a>
-      <a href="mib.html">Integrity Board</a>
-      <a href="admin.html">Admin</a>
-    </div>
-  </div>
+  <header>
+    <h1>Logistics Dashboard</h1>
+    <button class="logout-btn" onclick="location.href='index.html'">Logout</button>
+  </header>
 
-  <h1>Logistics Dashboard</h1>
-  <p>Welcome, Logistics Partner! Manage shipments and update delivery statuses.</p>
+  <p>Welcome, Logistics Partner! Verify shipments and update delivery status here.</p>
 
-  <div>
-    <h2>Assigned Shipments</h2>
-    <p>[Placeholder for shipment list]</p>
-  </div>
+  <!-- Pending Shipments -->
+  <h2>Pending Shipments</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Trade ID</th>
+        <th>Farmer</th>
+        <th>Buyer</th>
+        <th>Commodity</th>
+        <th>Quantity</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="shipmentsTable">
+      <!-- dynamic rows -->
+    </tbody>
+  </table>
 
-  <script src="script.js" type="module"></script>
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
+
+    const shipmentsTable = document.getElementById("shipmentsTable");
+
+    async function loadShipments() {
+      const { data, error } = await supabase.from("trades").select("*");
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      shipmentsTable.innerHTML = "";
+      data.forEach(trade => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${trade.id || "N/A"}</td>
+          <td>${trade.farmer_name || "Farmer"}</td>
+          <td>${trade.buyer_name || "Buyer"}</td>
+          <td>${trade.commodity}</td>
+          <td>${trade.quantity}</td>
+          <td>${trade.status || "Awaiting Verification"}</td>
+          <td><button class="verify-btn" onclick="verifyShipment(${trade.id})">Verify</button></td>
+        `;
+        shipmentsTable.appendChild(row);
+      });
+    }
+
+    window.verifyShipment = async function (tradeId) {
+      const { error } = await supabase
+        .from("trades")
+        .update({ status: "Verified by Logistics" })
+        .eq("id", tradeId);
+
+      if (error) {
+        alert("Verification failed: " + error.message);
+      } else {
+        alert("Shipment verified!");
+        loadShipments();
+      }
+    };
+
+    loadShipments();
+  </script>
 </body>
 </html>
