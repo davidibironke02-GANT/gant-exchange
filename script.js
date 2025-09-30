@@ -1,135 +1,187 @@
-// script.js (root alongside farmer.html)
-// Requires: supabaseClient.js that exports { supabase }
-
-import { supabase } from './supabaseClient.js';
-
-// ------- DOM HANDLES -------
-const tradesBody   = document.getElementById('tradesBody');
-const addBtn       = document.getElementById('addTradeBtn');
-const farmerInput  = document.getElementById('farmerName');
-const buyerInput   = document.getElementById('buyerName');
-const commInput    = document.getElementById('commodity');
-const qtyInput     = document.getElementById('quantity');
-const priceInput   = document.getElementById('price');
-
-// Some pages (buyer.html, etc.) won’t have these elements — guard against nulls
-function hasFarmerUI() {
-  return tradesBody && addBtn && farmerInput && buyerInput && commInput && qtyInput && priceInput;
+/* ===== Base Theme ===== */
+body {
+  background-color: #0b2e13; /* dark forest green */
+  color: #f0f0f0;
+  font-family: 'IBM Plex Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
 }
 
-// ------- DUMMY DATA GENERATOR -------
-function generateDummyTrades(count = 1000) {
-  const farmers = ["John", "Mary", "David", "Jane", "Peter", "Amina", "Olu", "Chen", "Sofia", "Carlos",
-                   "Ife", "Ade", "Ngozi", "Kwame", "Fatou", "Hassan", "Leila", "Diego", "Marta", "Ibrahim"];
-  const buyers  = ["Global Foods", "FreshMart", "ExportCo", "AgriWorld", "BioFoods", "HealthyMart",
-                   "Harvest Hub", "Pacific Grains", "Maple Foods", "Northern Co-op"];
-  const commodities = ["Wheat", "Maize", "Rice", "Soybeans", "Barley", "Cocoa", "Coffee", "Beef", "Milk",
-                       "Apples", "Sesame", "Cashew", "Ginger", "Sorghum", "Millet"];
-
-  const trades = [];
-  for (let i = 0; i < count; i++) {
-    const farmer    = farmers[Math.floor(Math.random() * farmers.length)];
-    const buyer     = buyers[Math.floor(Math.random() * buyers.length)];
-    const commodity = commodities[Math.floor(Math.random() * commodities.length)];
-    const quantity  = Math.floor(Math.random() * 100) + 1;     // 1–100 tons
-    const price     = Math.floor(Math.random() * 500) + 100;   // $100–600
-    const status    = Math.random() < 0.5 ? 'escrow' : 'pending';
-    const comp      = 'passed';
-
-    trades.push({
-      farmer_name: farmer,
-      buyer_name: buyer,
-      commodity,
-      quantity,
-      price,
-      _status: status,
-      _compliance: comp
-    });
-  }
-  return trades;
+h1, h2, h3 {
+  color: #7fff7f;
+  font-family: 'Cormorant Garamond', serif;
 }
 
-// ------- RENDER HELPERS -------
-function badge(label, cls) {
-  return `<span class="badge ${cls}">${label}</span>`;
+a {
+  color: #7fff7f;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
 }
 
-function addTradeRow(trade, statusClass = 'escrow', complianceClass = 'passed') {
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td>${trade.farmer_name}</td>
-    <td>${trade.buyer_name}</td>
-    <td>${trade.commodity}</td>
-    <td>${trade.quantity}</td>
-    <td>$${Number(trade.price).toLocaleString()}</td>
-    <td>${badge(statusClass === 'pending' ? 'Settlement Pending' : 'Funds Escrowed', statusClass)}</td>
-    <td>${badge(complianceClass === 'passed' ? 'Compliance Passed' : 'Compliance Failed', complianceClass)}</td>
-  `;
-  tradesBody.appendChild(tr);
+/* ===== Navbar ===== */
+nav {
+  background-color: #133d20;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 15px;
+  align-items: center;
+  border-bottom: 2px solid #1d4d2d;
+}
+nav a {
+  color: #fff;
+  font-weight: 600;
+}
+nav a:hover {
+  color: #7fff7f;
 }
 
-// ------- LOAD TRADES -------
-async function loadTrades() {
-  if (!tradesBody) return;
-
-  tradesBody.innerHTML = '';
-
-  // Try to load from Supabase if table exists
-  let supaOK = false;
-  try {
-    const { data, error } = await supabase.from('trades').select('*');
-    if (!error && Array.isArray(data) && data.length) {
-      data.forEach(t => addTradeRow(t, 'pending', 'passed'));
-      supaOK = true;
-    }
-  } catch (e) {
-    // ignore; fallback to dummy below
-  }
-
-  // Fill the rest with dummy trades so it looks active
-  const dummyTrades = generateDummyTrades(supaOK ? 800 : 1000);
-  dummyTrades.forEach(t => addTradeRow(t, t._status, t._compliance));
+/* ===== Auth Box (Login Page) ===== */
+.auth-box {
+  background: #133d20;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  text-align: center;
+  margin: auto;
 }
 
-// ------- ADD TRADE (Supabase insert, then refresh) -------
-async function handleAddTrade() {
-  const farmer = farmerInput.value.trim();
-  const buyer  = buyerInput.value.trim();
-  const comm   = commInput.value.trim();
-  const qty    = Number(qtyInput.value);
-  const price  = Number(priceInput.value);
-
-  if (!farmer || !buyer || !comm || !qty || !price) {
-    alert('Please fill all fields.');
-    return;
-  }
-
-  try {
-    const { error } = await supabase.from('trades').insert([{
-      farmer_name: farmer,
-      buyer_name: buyer,
-      commodity: comm,
-      quantity: qty,
-      price: price
-    }]);
-    if (error) throw error;
-
-    // clear inputs & refresh list
-    farmerInput.value = '';
-    buyerInput.value  = '';
-    commInput.value   = '';
-    qtyInput.value    = '';
-    priceInput.value  = '';
-    await loadTrades();
-  } catch (e) {
-    alert('Insert failed: ' + (e?.message || e));
-  }
+.auth-box h1 {
+  font-size: 28px;
+  margin-bottom: 20px;
 }
 
-// ------- INIT -------
-document.addEventListener('DOMContentLoaded', () => {
-  if (hasFarmerUI()) {
-    addBtn.addEventListener('click', handleAddTrade);
-    loadTrades();
-  }
-});
+#userInfo {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #ddd;
+}
+
+/* ===== Buttons ===== */
+button {
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-btn {
+  background: linear-gradient(90deg, #28a745, #218838);
+  color: white;
+}
+.login-btn:hover {
+  background: linear-gradient(90deg, #34d058, #28a745);
+}
+
+.signup-btn {
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  color: white;
+}
+.signup-btn:hover {
+  background: linear-gradient(90deg, #3399ff, #007bff);
+}
+
+.logout-btn {
+  background: linear-gradient(90deg, #dc3545, #a71d2a);
+  color: white;
+}
+.logout-btn:hover {
+  background: linear-gradient(90deg, #e55365, #c82333);
+}
+
+/* ===== Role Picker ===== */
+.roles {
+  background: #1d4d2d;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.roles h3 {
+  margin-bottom: 10px;
+  color: #7fff7f;
+  font-size: 16px;
+}
+
+.roles label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.4;
+  font-size: 14px;
+  word-wrap: break-word;
+  white-space: normal; /* force wrapping */
+}
+
+.roles input {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+/* ===== Tables ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: #133d20;
+  border-radius: 8px;
+  overflow: hidden;
+}
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+}
+th {
+  background: #1d4d2d;
+  color: #7fff7f;
+}
+td {
+  border-bottom: 1px solid #1d4d2d;
+}
+
+/* ===== Badges ===== */
+.badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  display: inline-block;
+}
+.badge-pending {
+  background: #ffc107;
+  color: #111;
+}
+.badge-complete {
+  background: #28a745;
+  color: #fff;
+}
+.badge-failed {
+  background: #dc3545;
+  color: #fff;
+}
+
+/* ===== Cards (Reusable) ===== */
+.card {
+  background: #1d4d2d;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  color: #fff;
+}
+.card:hover {
+  background: #236038;
+}
