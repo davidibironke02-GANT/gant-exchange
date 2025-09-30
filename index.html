@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GANT Exchange Prototype</title>
+
+  <!-- ================== CSS STYLING ================== -->
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -108,7 +110,7 @@
 <body>
   <h1>GANT Exchange Prototype</h1>
 
-  <!-- Auth Section -->
+  <!-- ================== AUTH SECTION ================== -->
   <div id="auth">
     <button id="loginBtn">Login</button>
     <button id="signupBtn">Sign Up</button>
@@ -116,7 +118,7 @@
     <p id="userInfo"></p>
   </div>
 
-  <!-- Trades -->
+  <!-- ================== TRADES LIST ================== -->
   <h2>Trades List</h2>
   <table id="trades">
     <thead>
@@ -133,7 +135,7 @@
     <tbody id="tradesBody"></tbody>
   </table>
 
-  <!-- Add Trade -->
+  <!-- ================== ADD TRADE FORM ================== -->
   <div id="tradeForm" style="display:none;">
     <h2>Add a Trade</h2>
     <input type="text" id="farmerName" placeholder="Farmer name">
@@ -144,6 +146,7 @@
     <button id="addTradeBtn">Add Trade</button>
   </div>
 
+  <!-- ================== JAVASCRIPT / SUPABASE ================== -->
   <script type="module">
     import { supabase } from './supabaseClient.js';
 
@@ -154,7 +157,7 @@
     const tradeForm = document.getElementById("tradeForm");
     const tradesBody = document.getElementById("tradesBody");
 
-    // --- Auth functions ---
+    // ---------- AUTH FUNCTIONS (lines ~120–160) ----------
     loginBtn.addEventListener("click", async () => {
       const email = prompt("Enter email:");
       const password = prompt("Enter password:");
@@ -194,27 +197,46 @@
       loadTrades();
     }
 
-    // --- Trades ---
+    // ---------- MASSIVE TRADE GENERATOR (lines ~170–210) ----------
+    function generateDummyTrades(count = 1000) {
+      const farmers = ["John", "Mary", "David", "Jane", "Peter", "Amina", "Olu", "Chen", "Sofia", "Carlos"];
+      const buyers = ["Global Foods", "FreshMart", "ExportCo", "AgriWorld", "BioFoods", "HealthyMart"];
+      const commodities = ["Wheat", "Maize", "Rice", "Soybeans", "Barley", "Cocoa", "Coffee", "Beef", "Milk", "Apples"];
+
+      const trades = [];
+      for (let i = 0; i < count; i++) {
+        const farmer = farmers[Math.floor(Math.random() * farmers.length)];
+        const buyer = buyers[Math.floor(Math.random() * buyers.length)];
+        const commodity = commodities[Math.floor(Math.random() * commodities.length)];
+        const quantity = Math.floor(Math.random() * 100) + 1; // 1–100 tons
+        const price = Math.floor(Math.random() * 500) + 100; // $100–600
+        trades.push({
+          farmer_name: farmer,
+          buyer_name: buyer,
+          commodity,
+          quantity,
+          price
+        });
+      }
+      return trades;
+    }
+
+    // ---------- LOAD TRADES (lines ~220–250) ----------
     async function loadTrades() {
       const { data, error } = await supabase.from("trades").select("*");
       tradesBody.innerHTML = "";
 
-      if (error || !data || data.length === 0) {
-        // Dummy data fallback
-        const dummyTrades = [
-          { farmer_name: "John", buyer_name: "Mary", commodity: "Wheat", quantity: 50, price: 200 },
-          { farmer_name: "David", buyer_name: "Jane", commodity: "Beef", quantity: 50, price: 350 },
-          { farmer_name: "DNA man", buyer_name: "DNA woman", commodity: "Maize", quantity: 50, price: 200 }
-        ];
-
-        dummyTrades.forEach(trade => addTradeRow(trade, "escrow", "passed"));
-        return;
+      // First: show real trades (if any exist in Supabase)
+      if (!error && data && data.length > 0) {
+        data.forEach(trade => addTradeRow(trade, "pending", "passed"));
       }
 
-      // Real data from Supabase
-      data.forEach(trade => addTradeRow(trade, "pending", "passed"));
+      // Then: populate with 1,000 dummy trades
+      const dummyTrades = generateDummyTrades(1000);
+      dummyTrades.forEach(trade => addTradeRow(trade, "escrow", "passed"));
     }
 
+    // ---------- HELPER TO ADD A ROW (lines ~260–280) ----------
     function addTradeRow(trade, statusClass, complianceClass) {
       const row = document.createElement("tr");
       row.innerHTML = `
@@ -229,6 +251,7 @@
       tradesBody.appendChild(row);
     }
 
+    // ---------- ADD TRADE FORM (lines ~290–330) ----------
     async function addTrade() {
       const farmer = document.getElementById("farmerName").value.trim();
       const buyer = document.getElementById("buyerName").value.trim();
@@ -263,7 +286,7 @@
 
     document.getElementById("addTradeBtn").addEventListener("click", addTrade);
 
-    // On load
+    // ---------- INITIALIZE (lines ~340–350) ----------
     checkUser();
   </script>
 </body>
