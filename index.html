@@ -3,66 +3,129 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GANT Exchange Prototype</title>
+  <title>GANT Exchange - Login</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
-      background-color: #0b3d2e;
-      color: #e6e6e6;
-      font-family: Arial, sans-serif;
+      background-color: #0b2e13; /* dark green */
+      color: #fff;
+      font-family: 'IBM Plex Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-container {
+      background: #133d20;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      width: 90%;
+      max-width: 400px;
+    }
+    .login-container h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      margin-bottom: 20px;
       text-align: center;
-      padding: 40px;
+      color: #7fff7f;
     }
-    h1 {
-      color: #00cc66;
-      margin-bottom: 10px;
+    .login-container label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+      color: #ddd;
     }
-    h2 {
-      margin-top: 20px;
-      color: #e6e6e6;
+    .login-container input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+    .login-container button {
+      width: 100%;
+      padding: 12px;
+      background: #28a745;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .login-container button:hover {
+      background: #218838;
     }
     .roles {
+      background: #1d4d2d;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .roles label {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 30px;
+      align-items: center;
+      margin: 8px 0;
+      cursor: pointer;
     }
-    .role-btn {
-      background: #014421;
-      color: white;
-      padding: 15px 25px;
-      border-radius: 6px;
-      font-weight: bold;
-      text-decoration: none;
-      transition: background 0.2s;
-    }
-    .role-btn:hover {
-      background: #00994d;
-    }
-    footer {
-      margin-top: 50px;
-      font-size: 14px;
-      color: #aaa;
+    .roles input {
+      margin-right: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>GANT Exchange Prototype</h1>
-  <p>Welcome! Select your role to continue to the appropriate dashboard.</p>
+  <div class="login-container">
+    <h1>GANT Exchange</h1>
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="Enter your email" required>
 
-  <h2>Choose Your Role</h2>
-  <div class="roles">
-    <a href="farmer.html" class="role-btn">Farmer</a>
-    <a href="buyer.html" class="role-btn">Buyer</a>
-    <a href="logistics.html" class="role-btn">Logistics</a>
-    <a href="family.html" class="role-btn">Family</a>
-    <a href="mib.html" class="role-btn">Integrity Board</a>
-    <a href="admin.html" class="role-btn">Admin</a>
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter your password" required>
+
+      <div class="roles">
+        <label><input type="radio" name="role" value="farmer" required> Farmer – sell products, manage inventory</label>
+        <label><input type="radio" name="role" value="buyer"> Institutional Buyer – trade commodities</label>
+        <label><input type="radio" name="role" value="family"> E-commerce User – buy produce</label>
+        <label><input type="radio" name="role" value="logistics"> Third-Party Logistics – manage deliveries</label>
+        <label><input type="radio" name="role" value="admin"> Administrator – platform management</label>
+        <label><input type="radio" name="role" value="mib"> Market Integrity Board – compliance & analytics</label>
+      </div>
+
+      <button type="submit">Access GANT Exchange</button>
+    </form>
   </div>
 
-  <footer>
-    &copy; 2025 GANT Exchange Prototype. All rights reserved.
-  </footer>
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
+
+    const form = document.getElementById("loginForm");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const role = document.querySelector('input[name="role"]:checked').value;
+
+      // Auth with Supabase
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        alert("Login failed: " + error.message);
+        return;
+      }
+
+      // Redirect to correct dashboard
+      if (role === "farmer") window.location.href = "farmer.html";
+      if (role === "buyer") window.location.href = "buyer.html";
+      if (role === "family") window.location.href = "family.html";
+      if (role === "logistics") window.location.href = "logistics.html";
+      if (role === "admin") window.location.href = "admin.html";
+      if (role === "mib") window.location.href = "mib.html";
+    });
+  </script>
 </body>
 </html>
