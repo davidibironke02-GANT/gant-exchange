@@ -39,6 +39,41 @@
       background: #cc3b3b;
     }
 
+    .chart-link {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 16px;
+      background: #1f7a4d;
+      color: #f5f5dc;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    .chart-link:hover {
+      background: #29a366;
+    }
+
+    /* Search form */
+    #searchForm input {
+      padding: 10px;
+      margin-right: 8px;
+      border: none;
+      border-radius: 6px;
+    }
+    #searchForm button {
+      padding: 10px 16px;
+      background: #1f7a4d;
+      color: #f5f5dc;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #searchForm button:hover {
+      background: #29a366;
+    }
+
     /* Table */
     table {
       width: 100%;
@@ -60,26 +95,17 @@
       background: #163d2a;
     }
 
-    /* Search form */
-    #searchForm {
-      margin-bottom: 20px;
-    }
-    #searchForm input {
-      padding: 10px;
-      margin-right: 8px;
-      border: none;
-      border-radius: 6px;
-    }
-    #searchForm button {
-      padding: 10px 16px;
+    .buy-btn {
       background: #1f7a4d;
       color: #f5f5dc;
       border: none;
+      padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: 600;
+      transition: background 0.3s;
     }
-    #searchForm button:hover {
+    .buy-btn:hover {
       background: #29a366;
     }
   </style>
@@ -91,6 +117,9 @@
   </header>
 
   <p>Welcome, Buyer! Browse available trades and place your orders here.</p>
+
+  <!-- View Market Chart -->
+  <a href="chart.html" class="chart-link">📊 View Market Chart</a>
 
   <!-- Search Form -->
   <form id="searchForm">
@@ -143,7 +172,7 @@
           <td>${trade.commodity}</td>
           <td>${trade.quantity}</td>
           <td>$${trade.price}</td>
-          <td><button onclick="alert('Order placed for ${trade.commodity}!')">Buy</button></td>
+          <td><button class="buy-btn" onclick="alert('Order placed for ${trade.commodity}!')">Buy</button></td>
         `;
         tradesTable.appendChild(row);
       });
