@@ -7,65 +7,82 @@
   <link rel="stylesheet" href="style.css">
   <style>
     body {
-      background-color: #0b2e13;
-      color: #fff;
+      background-color: #0a1f14; /* deep McKinsey green */
+      color: #f5f5dc; /* beige text */
       font-family: 'IBM Plex Sans', sans-serif;
       margin: 0;
       padding: 0;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      text-align: center;
     }
+
+    /* Header */
+    header {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #f5f5dc; /* beige */
+      margin-bottom: 40px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* Container */
     .role-box {
-      background: #133d20;
+      background: #11291b; /* slightly lighter deep green */
       padding: 40px;
       border-radius: 12px;
       width: 90%;
       max-width: 420px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-      text-align: center;
     }
-    h1 {
+
+    .role-box h1 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 28px;
-      color: #7fff7f;
-      margin-bottom: 20px;
+      font-size: 26px;
+      margin-bottom: 25px;
+      color: #f5f5dc; /* beige */
     }
+
+    /* Buttons */
     .role-btn {
       display: block;
       width: 100%;
       padding: 14px;
-      margin: 10px 0;
+      margin: 12px 0;
       border: none;
       border-radius: 8px;
-      font-weight: bold;
+      font-weight: 600;
       font-size: 16px;
       cursor: pointer;
-      color: white;
-      transition: all 0.3s ease;
+      background: #1f7a4d; /* lighter green */
+      color: #f5f5dc; /* beige */
       text-decoration: none;
+      transition: all 0.3s ease;
     }
+
     .role-btn:hover {
-      opacity: 0.9;
+      background: #29a366; /* brighter hover green */
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
-    .farmer { background: linear-gradient(90deg, #28a745, #218838); }
-    .buyer { background: linear-gradient(90deg, #007bff, #0056b3); }
-    .family { background: linear-gradient(90deg, #ff9800, #e65100); }
-    .logistics { background: linear-gradient(90deg, #6f42c1, #4b2a99); }
-    .admin { background: linear-gradient(90deg, #dc3545, #a71d2a); }
-    .mib { background: linear-gradient(90deg, #17a2b8, #11707f); }
   </style>
 </head>
 <body>
+  <header>WELCOME TO GANT EXCHANGE</header>
+
   <div class="role-box">
-    <h1>GANT Exchange Prototype</h1>
-    <a href="farmer.html" class="role-btn farmer">Farmer Dashboard</a>
-    <a href="buyer.html" class="role-btn buyer">Buyer Dashboard</a>
-    <a href="family.html" class="role-btn family">Family E-Commerce</a>
-    <a href="logistics.html" class="role-btn logistics">Logistics Dashboard</a>
-    <a href="admin.html" class="role-btn admin">Admin Panel</a>
-    <a href="mib.html" class="role-btn mib">Market Integrity Board</a>
+    <h1>Select Your Dashboard</h1>
+    <a href="farmer.html" class="role-btn">Farmer Dashboard</a>
+    <a href="buyer.html" class="role-btn">Buyer Dashboard</a>
+    <a href="family.html" class="role-btn">Family E-Commerce</a>
+    <a href="logistics.html" class="role-btn">Logistics Dashboard</a>
+    <a href="admin.html" class="role-btn">Admin Panel</a>
+    <a href="mib.html" class="role-btn">Market Integrity Board</a>
   </div>
 </body>
 </html>
