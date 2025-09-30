@@ -70,6 +70,23 @@
       font-size: 14px;
       color: #ddd;
     }
+    .roles {
+      background: #1d4d2d;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    .roles label {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .roles input {
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -78,6 +95,17 @@
     <button id="loginBtn" class="login-btn">Login</button>
     <button id="signupBtn" class="signup-btn">Sign Up</button>
     <button id="logoutBtn" class="logout-btn" style="display:none;">Logout</button>
+
+    <!-- Role Picker -->
+    <div class="roles">
+      <label><input type="radio" name="role" value="farmer" required> Farmer – sell products, manage inventory</label>
+      <label><input type="radio" name="role" value="buyer"> Institutional Buyer – trade commodities</label>
+      <label><input type="radio" name="role" value="family"> E-commerce User – buy produce</label>
+      <label><input type="radio" name="role" value="logistics"> Third-Party Logistics – manage deliveries</label>
+      <label><input type="radio" name="role" value="admin"> Administrator – platform management</label>
+      <label><input type="radio" name="role" value="mib"> Market Integrity Board – compliance & analytics</label>
+    </div>
+
     <p id="userInfo"></p>
   </div>
 
@@ -93,16 +121,22 @@
       const email = prompt("Enter email:");
       const password = prompt("Enter password:");
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) alert("Login failed: " + error.message);
-      else checkUser();
+      if (error) {
+        alert("Login failed: " + error.message);
+      } else {
+        redirectUser();
+      }
     });
 
     signupBtn.addEventListener("click", async () => {
       const email = prompt("Enter email:");
       const password = prompt("Enter password:");
       const { error } = await supabase.auth.signUp({ email, password });
-      if (error) alert("Signup failed: " + error.message);
-      else alert("Check your email to confirm signup.");
+      if (error) {
+        alert("Signup failed: " + error.message);
+      } else {
+        alert("Check your email to confirm signup.");
+      }
     });
 
     logoutBtn.addEventListener("click", async () => {
@@ -117,12 +151,27 @@
         loginBtn.style.display = "none";
         signupBtn.style.display = "none";
         logoutBtn.style.display = "inline-block";
+        redirectUser();
       } else {
         userInfo.textContent = "";
         loginBtn.style.display = "block";
         signupBtn.style.display = "block";
         logoutBtn.style.display = "none";
       }
+    }
+
+    function redirectUser() {
+      const role = document.querySelector('input[name="role"]:checked');
+      if (!role) {
+        alert("Please select a role.");
+        return;
+      }
+      if (role.value === "farmer") window.location.href = "farmer.html";
+      if (role.value === "buyer") window.location.href = "buyer.html";
+      if (role.value === "family") window.location.href = "family.html";
+      if (role.value === "logistics") window.location.href = "logistics.html";
+      if (role.value === "admin") window.location.href = "admin.html";
+      if (role.value === "mib") window.location.href = "mib.html";
     }
 
     checkUser();
