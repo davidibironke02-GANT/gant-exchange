@@ -3,31 +3,158 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buyer Dashboard - GANT Exchange</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Buyer Dashboard</title>
+  <style>
+    body {
+      font-family: "IBM Plex Sans", sans-serif;
+      background-color: #0b1f16; /* deep green */
+      color: #f5f5dc; /* beige */
+      margin: 0;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .logout-btn {
+      background: #a83232;
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .logout-btn:hover {
+      background: #cc3b3b;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #11291b;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background: #1f7a4d;
+      color: #f5f5dc;
+    }
+    tr:nth-child(even) {
+      background: #163d2a;
+    }
+
+    /* Search form */
+    #searchForm {
+      margin-bottom: 20px;
+    }
+    #searchForm input {
+      padding: 10px;
+      margin-right: 8px;
+      border: none;
+      border-radius: 6px;
+    }
+    #searchForm button {
+      padding: 10px 16px;
+      background: #1f7a4d;
+      color: #f5f5dc;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #searchForm button:hover {
+      background: #29a366;
+    }
+  </style>
 </head>
 <body>
-  <div class="navbar">
-    <div class="brand">GANT Exchange</div>
-    <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="farmer.html">Farmer</a>
-      <a href="buyer.html">Buyer</a>
-      <a href="logistics.html">Logistics</a>
-      <a href="family.html">Family</a>
-      <a href="mib.html">Integrity Board</a>
-      <a href="admin.html">Admin</a>
-    </div>
-  </div>
+  <header>
+    <h1>Buyer Dashboard</h1>
+    <button class="logout-btn" onclick="location.href='index.html'">Logout</button>
+  </header>
 
-  <h1>Buyer Dashboard</h1>
-  <p>Welcome, Buyer! Browse commodities and place orders here.</p>
+  <p>Welcome, Buyer! Browse available trades and place your orders here.</p>
 
-  <div>
-    <h2>Available Commodities</h2>
-    <p>[Placeholder for commodities marketplace]</p>
-  </div>
+  <!-- Search Form -->
+  <form id="searchForm">
+    <input type="text" id="commoditySearch" placeholder="Search commodity...">
+    <button type="submit">Search</button>
+  </form>
 
-  <script src="script.js" type="module"></script>
+  <!-- Available Trades -->
+  <h2>Available Trades</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Farmer</th>
+        <th>Commodity</th>
+        <th>Quantity</th>
+        <th>Price/ton</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="availableTrades">
+      <!-- dynamic rows -->
+    </tbody>
+  </table>
+
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
+
+    const tradesTable = document.getElementById("availableTrades");
+    const searchForm = document.getElementById("searchForm");
+    const commoditySearch = document.getElementById("commoditySearch");
+
+    async function loadTrades(filter = "") {
+      let query = supabase.from("trades").select("*");
+
+      if (filter) {
+        query = query.ilike("commodity", `%${filter}%`);
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      tradesTable.innerHTML = "";
+      data.forEach(trade => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${trade.farmer_name || "Farmer"}</td>
+          <td>${trade.commodity}</td>
+          <td>${trade.quantity}</td>
+          <td>$${trade.price}</td>
+          <td><button onclick="alert('Order placed for ${trade.commodity}!')">Buy</button></td>
+        `;
+        tradesTable.appendChild(row);
+      });
+    }
+
+    searchForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      loadTrades(commoditySearch.value.trim());
+    });
+
+    loadTrades();
+  </script>
 </body>
 </html>
