@@ -4,291 +4,65 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GANT Exchange Prototype</title>
-
-  <!-- ================== CSS STYLING ================== -->
+  <link rel="stylesheet" href="style.css">
   <style>
     body {
+      background-color: #0b3d2e;
+      color: #e6e6e6;
       font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #0b3d2e; /* deep forest green */
-      color: #e6e6e6; /* light grey text */
+      text-align: center;
+      padding: 40px;
     }
-
     h1 {
-      text-align: center;
-      color: #00cc66; /* bright green accent */
+      color: #00cc66;
+      margin-bottom: 10px;
     }
-
-    #auth {
-      margin-bottom: 20px;
-      text-align: right;
-    }
-
-    button {
-      padding: 8px 15px;
-      margin: 5px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      opacity: 0.85;
-    }
-
-    #loginBtn, #signupBtn {
-      background-color: #007bff;
-      color: white;
-    }
-
-    #logoutBtn {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-      background: #133d2a; /* dark green table background */
-      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-    }
-
-    th, td {
-      border: 1px solid #1e5b40;
-      padding: 12px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #145a32; /* lighter green header */
-      color: white;
-    }
-
-    .badge {
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.9em;
-      color: white;
-    }
-
-    .pending { background-color: orange; }
-    .escrow { background-color: blue; }
-    .passed { background-color: green; }
-    .failed { background-color: red; }
-
-    #tradeForm {
-      margin-top: 25px;
-      margin-bottom: 25px;
-      padding: 15px;
-      background: #133d2a;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-    }
-
-    input {
-      display: block;
-      width: 95%;
-      padding: 8px;
-      margin: 8px 0;
-      border: 1px solid #1e5b40;
-      border-radius: 4px;
-      background: #0f2f23;
+    h2 {
+      margin-top: 20px;
       color: #e6e6e6;
     }
-
-    #addTradeBtn {
-      background-color: #00cc66;
-      color: white;
-      width: 100%;
+    .roles {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
     }
-
-    #addTradeBtn:hover {
-      background-color: #00994d;
+    .role-btn {
+      background: #014421;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 6px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .role-btn:hover {
+      background: #00994d;
+    }
+    footer {
+      margin-top: 50px;
+      font-size: 14px;
+      color: #aaa;
     }
   </style>
 </head>
 <body>
   <h1>GANT Exchange Prototype</h1>
+  <p>Welcome! Select your role to continue to the appropriate dashboard.</p>
 
-  <!-- ================== AUTH SECTION ================== -->
-  <div id="auth">
-    <button id="loginBtn">Login</button>
-    <button id="signupBtn">Sign Up</button>
-    <button id="logoutBtn" style="display:none;">Logout</button>
-    <p id="userInfo"></p>
+  <h2>Choose Your Role</h2>
+  <div class="roles">
+    <a href="farmer.html" class="role-btn">Farmer</a>
+    <a href="buyer.html" class="role-btn">Buyer</a>
+    <a href="logistics.html" class="role-btn">Logistics</a>
+    <a href="family.html" class="role-btn">Family</a>
+    <a href="mib.html" class="role-btn">Integrity Board</a>
+    <a href="admin.html" class="role-btn">Admin</a>
   </div>
 
-  <!-- ================== ADD TRADE FORM ================== -->
-  <div id="tradeForm" style="display:none;">
-    <h2>Add a Trade</h2>
-    <input type="text" id="farmerName" placeholder="Farmer name">
-    <input type="text" id="buyerName" placeholder="Buyer name">
-    <input type="text" id="commodity" placeholder="Commodity">
-    <input type="number" id="quantity" placeholder="Quantity (tons)">
-    <input type="number" id="price" placeholder="Price per ton">
-    <button id="addTradeBtn">Add Trade</button>
-  </div>
-
-  <!-- ================== TRADES LIST ================== -->
-  <h2>Trades List</h2>
-  <table id="trades">
-    <thead>
-      <tr>
-        <th>Farmer</th>
-        <th>Buyer</th>
-        <th>Commodity</th>
-        <th>Quantity (tons)</th>
-        <th>Price/ton</th>
-        <th>Status</th>
-        <th>Compliance</th>
-      </tr>
-    </thead>
-    <tbody id="tradesBody"></tbody>
-  </table>
-
-  <!-- ================== JAVASCRIPT / SUPABASE ================== -->
-  <script type="module">
-    import { supabase } from './supabaseClient.js';
-
-    const loginBtn = document.getElementById("loginBtn");
-    const signupBtn = document.getElementById("signupBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const userInfo = document.getElementById("userInfo");
-    const tradeForm = document.getElementById("tradeForm");
-    const tradesBody = document.getElementById("tradesBody");
-
-    // ---------- AUTH FUNCTIONS ----------
-    loginBtn.addEventListener("click", async () => {
-      const email = prompt("Enter email:");
-      const password = prompt("Enter password:");
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) alert("Login failed: " + error.message);
-      else await checkUser();
-    });
-
-    signupBtn.addEventListener("click", async () => {
-      const email = prompt("Enter email:");
-      const password = prompt("Enter password:");
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) alert("Signup failed: " + error.message);
-      else alert("Check your email to confirm signup");
-    });
-
-    logoutBtn.addEventListener("click", async () => {
-      await supabase.auth.signOut();
-      await checkUser();
-    });
-
-    async function checkUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        userInfo.textContent = "Logged in as: " + user.email;
-        loginBtn.style.display = "none";
-        signupBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-        tradeForm.style.display = "block";
-      } else {
-        userInfo.textContent = "";
-        loginBtn.style.display = "inline-block";
-        signupBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-        tradeForm.style.display = "none";
-      }
-      loadTrades();
-    }
-
-    // ---------- MASSIVE TRADE GENERATOR ----------
-    function generateDummyTrades(count = 1000) {
-      const farmers = ["John", "Mary", "David", "Jane", "Peter", "Amina", "Olu", "Chen", "Sofia", "Carlos"];
-      const buyers = ["Global Foods", "FreshMart", "ExportCo", "AgriWorld", "BioFoods", "HealthyMart"];
-      const commodities = ["Wheat", "Maize", "Rice", "Soybeans", "Barley", "Cocoa", "Coffee", "Beef", "Milk", "Apples"];
-
-      const trades = [];
-      for (let i = 0; i < count; i++) {
-        const farmer = farmers[Math.floor(Math.random() * farmers.length)];
-        const buyer = buyers[Math.floor(Math.random() * buyers.length)];
-        const commodity = commodities[Math.floor(Math.random() * commodities.length)];
-        const quantity = Math.floor(Math.random() * 100) + 1; // 1–100 tons
-        const price = Math.floor(Math.random() * 500) + 100; // $100–600
-        trades.push({
-          farmer_name: farmer,
-          buyer_name: buyer,
-          commodity,
-          quantity,
-          price
-        });
-      }
-      return trades;
-    }
-
-    // ---------- LOAD TRADES ----------
-    async function loadTrades() {
-      const { data, error } = await supabase.from("trades").select("*");
-      tradesBody.innerHTML = "";
-
-      // First: show real trades
-      if (!error && data && data.length > 0) {
-        data.forEach(trade => addTradeRow(trade, "pending", "passed"));
-      }
-
-      // Then: populate with dummy trades
-      const dummyTrades = generateDummyTrades(1000);
-      dummyTrades.forEach(trade => addTradeRow(trade, "escrow", "passed"));
-    }
-
-    // ---------- HELPER TO ADD ROW ----------
-    function addTradeRow(trade, statusClass, complianceClass) {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${trade.farmer_name}</td>
-        <td>${trade.buyer_name}</td>
-        <td>${trade.commodity}</td>
-        <td>${trade.quantity}</td>
-        <td>$${trade.price}</td>
-        <td><span class="badge ${statusClass}">${statusClass === "pending" ? "Settlement Pending" : "Funds Escrowed"}</span></td>
-        <td><span class="badge ${complianceClass}">${complianceClass === "passed" ? "Compliance Passed" : "Compliance Failed"}</span></td>
-      `;
-      tradesBody.appendChild(row);
-    }
-
-    // ---------- ADD TRADE FORM ----------
-    async function addTrade() {
-      const farmer = document.getElementById("farmerName").value.trim();
-      const buyer = document.getElementById("buyerName").value.trim();
-      const commodity = document.getElementById("commodity").value.trim();
-      const quantity = document.getElementById("quantity").value;
-      const price = document.getElementById("price").value;
-
-      if (!farmer || !buyer || !commodity || !quantity || !price) {
-        alert("Fill all fields");
-        return;
-      }
-
-      const { error } = await supabase.from("trades").insert([{
-        farmer_name: farmer,
-        buyer_name: buyer,
-        commodity,
-        quantity,
-        price
-      }]);
-
-      if (error) {
-        alert("Insert failed: " + error.message);
-      } else {
-        document.getElementById("farmerName").value = "";
-        document.getElementById("buyerName").value = "";
-        document.getElementById("commodity").value = "";
-        document.getElementById("quantity").value = "";
-        document.getElementById("price").value = "";
-        loadTrades();
-      }
-    }
-
-    document.getElementById("addTradeBtn").addEventListener("click", addTrade);
-
-    // ---------- INITIALIZE ----------
-    checkUser();
-  </script>
+  <footer>
+    &copy; 2025 GANT Exchange Prototype. All rights reserved.
+  </footer>
 </body>
 </html>
