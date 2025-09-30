@@ -4,6 +4,100 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GANT Exchange Prototype</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #006400;
+    }
+
+    #auth {
+      margin-bottom: 20px;
+      text-align: right;
+    }
+
+    button {
+      padding: 8px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #loginBtn, #signupBtn {
+      background-color: #007bff;
+      color: white;
+    }
+
+    #logoutBtn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #006400;
+      color: white;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: white;
+      font-size: 0.9em;
+    }
+
+    .pending { background-color: orange; }
+    .escrow { background-color: blue; }
+    .passed { background-color: green; }
+    .failed { background-color: red; }
+
+    #tradeForm {
+      margin-top: 25px;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    input {
+      display: block;
+      width: 95%;
+      padding: 8px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    #addTradeBtn {
+      background-color: #28a745;
+      color: white;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
   <h1>GANT Exchange Prototype</h1>
@@ -18,7 +112,20 @@
 
   <!-- Trades -->
   <h2>Trades List</h2>
-  <ul id="trades"></ul>
+  <table id="trades">
+    <thead>
+      <tr>
+        <th>Farmer</th>
+        <th>Buyer</th>
+        <th>Commodity</th>
+        <th>Quantity (tons)</th>
+        <th>Price/ton</th>
+        <th>Status</th>
+        <th>Compliance</th>
+      </tr>
+    </thead>
+    <tbody id="tradesBody"></tbody>
+  </table>
 
   <!-- Add Trade -->
   <div id="tradeForm" style="display:none;">
@@ -39,7 +146,7 @@
     const logoutBtn = document.getElementById("logoutBtn");
     const userInfo = document.getElementById("userInfo");
     const tradeForm = document.getElementById("tradeForm");
-    const tradesList = document.getElementById("trades");
+    const tradesBody = document.getElementById("tradesBody");
 
     // --- Auth functions ---
     loginBtn.addEventListener("click", async () => {
@@ -84,7 +191,7 @@
     // --- Trades ---
     async function loadTrades() {
       const { data, error } = await supabase.from("trades").select("*");
-      tradesList.innerHTML = "";
+      tradesBody.innerHTML = "";
 
       if (error || !data || data.length === 0) {
         // Dummy data fallback
@@ -94,20 +201,26 @@
           { farmer_name: "DNA man", buyer_name: "DNA woman", commodity: "Maize", quantity: 50, price: 200 }
         ];
 
-        dummyTrades.forEach(trade => {
-          const li = document.createElement("li");
-          li.textContent = `${trade.farmer_name} sold ${trade.quantity} tons of ${trade.commodity} to ${trade.buyer_name} @ $${trade.price}/ton [Funds Escrowed] ✅ Compliance Check Passed`;
-          tradesList.appendChild(li);
-        });
+        dummyTrades.forEach(trade => addTradeRow(trade, "escrow", "passed"));
         return;
       }
 
       // Real data from Supabase
-      data.forEach(trade => {
-        const li = document.createElement("li");
-        li.textContent = `${trade.farmer_name} sold ${trade.quantity} tons of ${trade.commodity} to ${trade.buyer_name} @ $${trade.price}/ton [Settlement Pending] ✅ Compliance Check Passed`;
-        tradesList.appendChild(li);
-      });
+      data.forEach(trade => addTradeRow(trade, "pending", "passed"));
+    }
+
+    function addTradeRow(trade, statusClass, complianceClass) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${trade.farmer_name}</td>
+        <td>${trade.buyer_name}</td>
+        <td>${trade.commodity}</td>
+        <td>${trade.quantity}</td>
+        <td>$${trade.price}</td>
+        <td><span class="badge ${statusClass}">${statusClass === "pending" ? "Settlement Pending" : "Funds Escrowed"}</span></td>
+        <td><span class="badge ${complianceClass}">${complianceClass === "passed" ? "Compliance Passed" : "Compliance Failed"}</span></td>
+      `;
+      tradesBody.appendChild(row);
     }
 
     async function addTrade() {
