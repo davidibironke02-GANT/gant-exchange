@@ -1,1 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farmer Dashboard - GANT Exchange</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="navbar">
+    <div class="brand">GANT Exchange</div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="farmer.html">Farmer</a>
+      <a href="buyer.html">Buyer</a>
+      <a href="logistics.html">Logistics</a>
+      <a href="family.html">Family</a>
+      <a href="mib.html">Integrity Board</a>
+      <a href="admin.html">Admin</a>
+    </div>
+  </div>
 
+  <h1>Farmer Dashboard</h1>
+  <p>Welcome, Farmer! Manage your trades and view settlements.</p>
+
+  <!-- Add Trade Form -->
+  <div id="tradeForm" style="display:none;">
+    <h2>Add a Trade</h2>
+    <input type="text" id="farmerName" placeholder="Farmer name">
+    <input type="text" id="buyerName" placeholder="Buyer name">
+    <input type="text" id="commodity" placeholder="Commodity">
+    <input type="number" id="quantity" placeholder="Quantity (tons)">
+    <input type="number" id="price" placeholder="Price per ton">
+    <button id="addTradeBtn">Add Trade</button>
+  </div>
+
+  <!-- Trades Table -->
+  <h2>Trades List</h2>
+  <table id="trades">
+    <thead>
+      <tr>
+        <th>Farmer</th>
+        <th>Buyer</th>
+        <th>Commodity</th>
+        <th>Quantity</th>
+        <th>Price/ton</th>
+        <th>Status</th>
+        <th>Compliance</th>
+      </tr>
+    </thead>
+    <tbody id="tradesBody"></tbody>
+  </table>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
