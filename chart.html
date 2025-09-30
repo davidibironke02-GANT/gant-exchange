@@ -1,1 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intraday Market Chart</title>
+  <style>
+    body {
+      font-family: "IBM Plex Sans", sans-serif;
+      background-color: #0b1f16; /* deep green */
+      color: #f5f5dc; /* beige */
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
 
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .logout-btn {
+      background: #a83232;
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .logout-btn:hover {
+      background: #cc3b3b;
+    }
+
+    .chart-box {
+      background: #11291b;
+      border-radius: 8px;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Intraday Market Chart</h1>
+    <button class="logout-btn" onclick="location.href='index.html'">Logout</button>
+  </header>
+
+  <div class="chart-box">
+    <canvas id="priceChart" style="max-width:100%; height:400px;"></canvas>
+  </div>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    const ctx = document.getElementById('priceChart').getContext('2d');
+
+    // Dummy intraday data (replace later with live data)
+    const hours = ['9:00','10:00','11:00','12:00','13:00','14:00','15:00'];
+    const prices = [3.5, 3.7, 3.9, 4.1, 4.0, 4.3, 4.2];
+
+    const priceChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: hours,
+        datasets: [{
+          label: 'Corn Price (USD)',
+          data: prices,
+          borderColor: '#29a366',
+          backgroundColor: 'rgba(41, 163, 102, 0.2)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#f5f5dc',
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            ticks: { color: '#f5f5dc' },
+            grid: { color: '#224632' }
+          },
+          y: {
+            ticks: { color: '#f5f5dc' },
+            grid: { color: '#224632' }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: { color: '#f5f5dc' }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
