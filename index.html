@@ -3,49 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GANT Exchange - Prototype</title>
-  <link rel="stylesheet" href="style.css">
+  <title>GANT Exchange</title>
   <style>
-    body {
-      background-color: #0a1f14; /* deep McKinsey green */
-      color: #f5f5dc; /* beige text */
-      font-family: 'IBM Plex Sans', sans-serif;
+    /* Reset */
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "IBM Plex Sans", sans-serif;
+      background-color: #0b1f16; /* deep forest green */
+      color: #f5f5dc; /* beige text */
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      text-align: center;
+      min-height: 100vh;
+      flex-direction: column;
     }
 
     /* Header */
-    header {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 32px;
+    h1 {
+      font-size: 2rem;
       font-weight: 700;
-      color: #f5f5dc; /* beige */
-      margin-bottom: 40px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
+      margin-bottom: 20px;
+      text-align: center;
+      letter-spacing: 2px;
     }
 
-    /* Container */
-    .role-box {
-      background: #11291b; /* slightly lighter deep green */
-      padding: 40px;
-      border-radius: 12px;
+    /* Card */
+    .card {
+      background: #11291b;
+      border-radius: 10px;
+      padding: 30px 20px;
+      margin: 20px auto;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+      max-width: 500px; /* slimmer card */
       width: 90%;
-      max-width: 420px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+      text-align: center;
     }
 
-    .role-box h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 26px;
-      margin-bottom: 25px;
-      color: #f5f5dc; /* beige */
+    .card h2 {
+      margin-bottom: 20px;
+      font-size: 1.3rem;
     }
 
     /* Buttons */
@@ -53,36 +54,37 @@
       display: block;
       width: 100%;
       padding: 14px;
-      margin: 12px 0;
+      margin: 12px 0; /* spacing between buttons */
       border: none;
       border-radius: 8px;
       font-weight: 600;
       font-size: 16px;
       cursor: pointer;
       background: #1f7a4d; /* lighter green */
-      color: #f5f5dc; /* beige */
-      text-decoration: none;
+      color: #f5f5dc;
       transition: all 0.3s ease;
     }
 
     .role-btn:hover {
-      background: #29a366; /* brighter hover green */
+      background: #29a366;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
   </style>
 </head>
 <body>
-  <header>WELCOME TO GANT EXCHANGE</header>
+  <!-- Header -->
+  <h1>WELCOME TO GANT EXCHANGE</h1>
 
-  <div class="role-box">
-    <h1>Select Your Dashboard</h1>
-    <a href="farmer.html" class="role-btn">Farmer Dashboard</a>
-    <a href="buyer.html" class="role-btn">Buyer Dashboard</a>
-    <a href="family.html" class="role-btn">Family E-Commerce</a>
-    <a href="logistics.html" class="role-btn">Logistics Dashboard</a>
-    <a href="admin.html" class="role-btn">Admin Panel</a>
-    <a href="mib.html" class="role-btn">Market Integrity Board</a>
+  <!-- Dashboard Card -->
+  <div class="card">
+    <h2>Select Your Dashboard</h2>
+    <button class="role-btn" onclick="location.href='farmer.html'">Farmer Dashboard</button>
+    <button class="role-btn" onclick="location.href='buyer.html'">Buyer Dashboard</button>
+    <button class="role-btn" onclick="location.href='family.html'">Family E-Commerce</button>
+    <button class="role-btn" onclick="location.href='logistics.html'">Logistics Dashboard</button>
+    <button class="role-btn" onclick="location.href='admin.html'">Admin Panel</button>
+    <button class="role-btn" onclick="location.href='mib.html'">Market Integrity Board</button>
   </div>
 </body>
 </html>
