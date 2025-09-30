@@ -39,6 +39,41 @@
       background: #cc3b3b;
     }
 
+    .chart-link {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 16px;
+      background: #1f7a4d;
+      color: #f5f5dc;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    .chart-link:hover {
+      background: #29a366;
+    }
+
+    /* Form */
+    #tradeForm input {
+      padding: 10px;
+      margin: 5px;
+      border: none;
+      border-radius: 6px;
+    }
+    #tradeForm button {
+      padding: 10px 16px;
+      background: #1f7a4d;
+      color: #f5f5dc;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #tradeForm button:hover {
+      background: #29a366;
+    }
+
     /* Table */
     table {
       width: 100%;
@@ -69,6 +104,9 @@
 
   <p>Welcome, Farmer! Manage your trades and view settlements here.</p>
 
+  <!-- View Market Chart -->
+  <a href="chart.html" class="chart-link">📊 View Market Chart</a>
+
   <!-- Add Trade Form -->
   <h2>Add a Trade</h2>
   <form id="tradeForm">
@@ -92,7 +130,7 @@
       </tr>
     </thead>
     <tbody id="tradesTable">
-      <!-- dummy trade rows will be loaded here -->
+      <!-- dynamic rows -->
     </tbody>
   </table>
 
@@ -112,11 +150,11 @@
       data.forEach(trade => {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td>${trade.buyer_name}</td>
+          <td>${trade.buyer_name || "N/A"}</td>
           <td>${trade.commodity}</td>
           <td>${trade.quantity}</td>
           <td>$${trade.price}</td>
-          <td>Pending</td>
+          <td>${trade.status || "Pending"}</td>
         `;
         tradesTable.appendChild(row);
       });
