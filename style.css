@@ -1,7 +1,7 @@
-/* ====== Base Theme ====== */
+/* ===== Global Theme ===== */
 body {
-  background-color: #0b2e13; /* dark green */
-  color: #f0f0f0;
+  background-color: #0a1f14; /* deep forest green */
+  color: #f5f5dc; /* beige text */
   font-family: 'IBM Plex Sans', sans-serif;
   margin: 0;
   padding: 0;
@@ -9,72 +9,85 @@ body {
 }
 
 h1, h2, h3 {
-  color: #7fff7f;
+  color: #f5f5dc;
   font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
 }
 
 a {
-  color: #7fff7f;
+  color: #f5f5dc;
   text-decoration: none;
 }
 a:hover {
   text-decoration: underline;
 }
 
-/* ====== Navbar ====== */
+/* ===== Navbar ===== */
 nav {
-  background-color: #133d20;
+  background-color: #11291b;
   padding: 12px 20px;
   display: flex;
   justify-content: flex-start;
   gap: 15px;
   align-items: center;
-  border-bottom: 2px solid #1d4d2d;
+  border-bottom: 2px solid #1f3d2c;
 }
 nav a {
-  color: #fff;
+  color: #f5f5dc;
   font-weight: 600;
 }
 nav a:hover {
-  color: #7fff7f;
+  color: #29a366;
 }
 
-/* ====== Containers ====== */
+/* ===== Containers ===== */
 main, section {
   padding: 20px;
 }
 
-/* ====== Buttons ====== */
-button {
-  background: #28a745;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 18px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s ease;
+/* ===== Cards ===== */
+.card {
+  background: #11291b;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  color: #f5f5dc;
 }
-button:hover {
-  background: #218838;
+.card h2 {
+  margin-top: 0;
+  color: #29a366;
 }
 
-/* ====== Inputs ====== */
-input, select {
+/* ===== Buttons ===== */
+button, .role-btn {
+  display: block;
   width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 6px;
+  padding: 14px;
+  margin: 10px 0;
   border: none;
-  font-size: 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  background: #1f7a4d; /* lighter green */
+  color: #f5f5dc; /* beige */
+  transition: all 0.3s ease;
+  text-align: center;
+}
+button:hover, .role-btn:hover {
+  background: #29a366; /* brighter hover green */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-/* ====== Table ====== */
+/* ===== Tables ===== */
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
-  background: #133d20;
+  background: #11291b;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -83,14 +96,15 @@ th, td {
   text-align: left;
 }
 th {
-  background: #1d4d2d;
-  color: #7fff7f;
+  background: #1f3d2c;
+  color: #29a366; /* green highlight for headers */
 }
 td {
-  border-bottom: 1px solid #1d4d2d;
+  border-bottom: 1px solid #1f3d2c;
+  color: #f5f5dc;
 }
 
-/* ====== Badges ====== */
+/* ===== Badges ===== */
 .badge {
   padding: 4px 8px;
   border-radius: 6px;
@@ -103,7 +117,7 @@ td {
   color: #111;
 }
 .badge-complete {
-  background: #28a745;
+  background: #29a366;
   color: #fff;
 }
 .badge-failed {
@@ -111,14 +125,39 @@ td {
   color: #fff;
 }
 
-/* ====== Cards (for role selection, dashboards) ====== */
-.card {
-  background: #1d4d2d;
-  border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 15px;
-  color: #fff;
+/* ===== Auth Box (Login) ===== */
+.auth-box {
+  background: #11291b;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  text-align: center;
+  margin: auto;
 }
-.card:hover {
-  background: #236038;
+
+/* ===== Role Picker ===== */
+.roles {
+  background: #1f3d2c;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.roles label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.4;
+  font-size: 14px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+.roles input {
+  margin-top: 3px;
+  flex-shrink: 0;
 }
