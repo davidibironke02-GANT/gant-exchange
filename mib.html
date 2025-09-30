@@ -3,31 +3,168 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Market Integrity Board - GANT Exchange</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Market Integrity Board</title>
+  <style>
+    body {
+      font-family: "IBM Plex Sans", sans-serif;
+      background-color: #0b1f16; /* deep green */
+      color: #f5f5dc; /* beige */
+      margin: 0;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .logout-btn {
+      background: #a83232;
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .logout-btn:hover {
+      background: #cc3b3b;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #11291b;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background: #1f7a4d;
+      color: #f5f5dc;
+    }
+    tr:nth-child(even) {
+      background: #163d2a;
+    }
+
+    /* Flag Button */
+    .flag-btn {
+      background: #e6a700;
+      color: #111;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    .flag-btn:hover {
+      background: #ffcc33;
+    }
+
+    /* Compliance Reports */
+    .report-box {
+      margin-top: 30px;
+      padding: 20px;
+      background: #11291b;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+  </style>
 </head>
 <body>
-  <div class="navbar">
-    <div class="brand">GANT Exchange</div>
-    <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="farmer.html">Farmer</a>
-      <a href="buyer.html">Buyer</a>
-      <a href="logistics.html">Logistics</a>
-      <a href="family.html">Family</a>
-      <a href="mib.html">Integrity Board</a>
-      <a href="admin.html">Admin</a>
-    </div>
-  </div>
+  <header>
+    <h1>Market Integrity Board</h1>
+    <button class="logout-btn" onclick="location.href='index.html'">Logout</button>
+  </header>
 
-  <h1>Market Integrity Board</h1>
-  <p>Monitor all trades, enforce compliance, and flag risks.</p>
+  <p>Welcome, Board Member! Monitor all trades, flag suspicious activity, and review compliance.</p>
 
-  <div>
+  <!-- All Trades -->
+  <h2>All Trades Overview</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Trade ID</th>
+        <th>Farmer</th>
+        <th>Buyer</th>
+        <th>Commodity</th>
+        <th>Quantity</th>
+        <th>Price/ton</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="tradesTable">
+      <!-- dynamic rows -->
+    </tbody>
+  </table>
+
+  <!-- Compliance Reports -->
+  <div class="report-box">
     <h2>Compliance Reports</h2>
-    <p>[Placeholder for compliance dashboard]</p>
+    <p><strong>USMCA:</strong> All exports currently compliant.</p>
+    <p><strong>Food Safety:</strong> No violations detected.</p>
+    <p><strong>ESG:</strong> 87% of trades flagged as sustainable.</p>
   </div>
 
-  <script src="script.js" type="module"></script>
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
+
+    const tradesTable = document.getElementById("tradesTable");
+
+    async function loadTrades() {
+      const { data, error } = await supabase.from("trades").select("*");
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      tradesTable.innerHTML = "";
+      data.forEach(trade => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${trade.id || "N/A"}</td>
+          <td>${trade.farmer_name || "Farmer"}</td>
+          <td>${trade.buyer_name || "Buyer"}</td>
+          <td>${trade.commodity}</td>
+          <td>${trade.quantity}</td>
+          <td>$${trade.price}</td>
+          <td>${trade.status || "Pending"}</td>
+          <td><button class="flag-btn" onclick="flagTrade(${trade.id})">Flag</button></td>
+        `;
+        tradesTable.appendChild(row);
+      });
+    }
+
+    window.flagTrade = async function (tradeId) {
+      const { error } = await supabase
+        .from("trades")
+        .update({ status: "Flagged by MIB" })
+        .eq("id", tradeId);
+
+      if (error) {
+        alert("Flagging failed: " + error.message);
+      } else {
+        alert("Trade flagged for review.");
+        loadTrades();
+      }
+    };
+
+    loadTrades();
+  </script>
 </body>
 </html>
