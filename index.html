@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GANT Exchange - Login</title>
+  <title>GANT Exchange - Access</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
-      background-color: #0b2e13; /* dark green */
+      background-color: #0b2e13;
       color: #fff;
       font-family: 'IBM Plex Sans', sans-serif;
       margin: 0;
@@ -17,115 +17,115 @@
       align-items: center;
       height: 100vh;
     }
-    .login-container {
+    .auth-box {
       background: #133d20;
-      padding: 30px;
+      padding: 40px;
       border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      text-align: center;
       width: 90%;
       max-width: 400px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
     }
-    .login-container h1 {
+    h1 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 26px;
-      margin-bottom: 20px;
-      text-align: center;
+      font-size: 28px;
       color: #7fff7f;
+      margin-bottom: 20px;
     }
-    .login-container label {
+    button {
       display: block;
-      margin: 10px 0 5px;
-      font-weight: bold;
-      color: #ddd;
-    }
-    .login-container input, select {
       width: 100%;
-      padding: 10px;
-      border-radius: 6px;
+      padding: 14px;
+      margin: 10px 0;
       border: none;
-      margin-bottom: 15px;
-      font-size: 15px;
-    }
-    .login-container button {
-      width: 100%;
-      padding: 12px;
-      background: #28a745;
-      border: none;
-      border-radius: 6px;
-      color: #fff;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    .login-container button:hover {
-      background: #218838;
-    }
-    .roles {
-      background: #1d4d2d;
-      padding: 10px;
       border-radius: 8px;
-      margin-bottom: 15px;
-    }
-    .roles label {
-      display: flex;
-      align-items: center;
-      margin: 8px 0;
+      font-weight: bold;
+      font-size: 16px;
       cursor: pointer;
+      transition: all 0.3s ease;
     }
-    .roles input {
-      margin-right: 10px;
+    .login-btn {
+      background: linear-gradient(90deg, #28a745, #218838);
+      color: white;
+    }
+    .login-btn:hover {
+      background: linear-gradient(90deg, #34d058, #28a745);
+    }
+    .signup-btn {
+      background: linear-gradient(90deg, #007bff, #0056b3);
+      color: white;
+    }
+    .signup-btn:hover {
+      background: linear-gradient(90deg, #3399ff, #007bff);
+    }
+    .logout-btn {
+      background: linear-gradient(90deg, #dc3545, #a71d2a);
+      color: white;
+    }
+    .logout-btn:hover {
+      background: linear-gradient(90deg, #e55365, #c82333);
+    }
+    #userInfo {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #ddd;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
+  <div class="auth-box">
     <h1>GANT Exchange</h1>
-    <form id="loginForm">
-      <label for="email">Email</label>
-      <input type="email" id="email" placeholder="Enter your email" required>
-
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="Enter your password" required>
-
-      <div class="roles">
-        <label><input type="radio" name="role" value="farmer" required> Farmer – sell products, manage inventory</label>
-        <label><input type="radio" name="role" value="buyer"> Institutional Buyer – trade commodities</label>
-        <label><input type="radio" name="role" value="family"> E-commerce User – buy produce</label>
-        <label><input type="radio" name="role" value="logistics"> Third-Party Logistics – manage deliveries</label>
-        <label><input type="radio" name="role" value="admin"> Administrator – platform management</label>
-        <label><input type="radio" name="role" value="mib"> Market Integrity Board – compliance & analytics</label>
-      </div>
-
-      <button type="submit">Access GANT Exchange</button>
-    </form>
+    <button id="loginBtn" class="login-btn">Login</button>
+    <button id="signupBtn" class="signup-btn">Sign Up</button>
+    <button id="logoutBtn" class="logout-btn" style="display:none;">Logout</button>
+    <p id="userInfo"></p>
   </div>
 
   <script type="module">
     import { supabase } from './supabaseClient.js';
 
-    const form = document.getElementById("loginForm");
+    const loginBtn = document.getElementById("loginBtn");
+    const signupBtn = document.getElementById("signupBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const userInfo = document.getElementById("userInfo");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const role = document.querySelector('input[name="role"]:checked').value;
-
-      // Auth with Supabase
+    loginBtn.addEventListener("click", async () => {
+      const email = prompt("Enter email:");
+      const password = prompt("Enter password:");
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        alert("Login failed: " + error.message);
-        return;
-      }
-
-      // Redirect to correct dashboard
-      if (role === "farmer") window.location.href = "farmer.html";
-      if (role === "buyer") window.location.href = "buyer.html";
-      if (role === "family") window.location.href = "family.html";
-      if (role === "logistics") window.location.href = "logistics.html";
-      if (role === "admin") window.location.href = "admin.html";
-      if (role === "mib") window.location.href = "mib.html";
+      if (error) alert("Login failed: " + error.message);
+      else checkUser();
     });
+
+    signupBtn.addEventListener("click", async () => {
+      const email = prompt("Enter email:");
+      const password = prompt("Enter password:");
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) alert("Signup failed: " + error.message);
+      else alert("Check your email to confirm signup.");
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      checkUser();
+    });
+
+    async function checkUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        userInfo.textContent = "Logged in as: " + user.email;
+        loginBtn.style.display = "none";
+        signupBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
+      } else {
+        userInfo.textContent = "";
+        loginBtn.style.display = "block";
+        signupBtn.style.display = "block";
+        logoutBtn.style.display = "none";
+      }
+    }
+
+    checkUser();
   </script>
 </body>
 </html>
